@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<!-- Create an element where the map will take place -->
+<body>
+<div id="div_template" style="background-color:black;display:block;overflow: hidden" width=900 height="850">
+    </div>
+<script>
+
+
+// Load external data and boot
+    
+    data = d3.csv("LifeExpectancyData.csv",function(data) {
+        width = 869,
+        height = 500;
+        var path = d3.geoPath();
+        //add div for tooltip
+        var Tooltip = d3.select("#div_template")
+        .append("div").attr("width",400+"px")
+        .style("opacity", 0)
+        .style("background-color", "transparent").style("color","orange").style("position", "relative").style("display","block")
+        
+        
+        
+        //add svg for the map
+        var svg = d3.select("#div_template")
+        .append("svg")
+        .attr("height", height)
+        .attr("width", width)
+        .style("display","block")
+        .style("margin","auto")
+        
+        
+        
+        
+        var projection = d3.geoMercator()
+        .scale(100)
+        
+        
+          
+        var countryArray = [];
+        var lifeArray = [];
+        var countryId = [];
+        var k =0
+        countryArray.push(data[0].Country)
+        lifeArray.push(parseInt(data[0].LifeExpectancy))
+        
+        //get data from csv file and add to the json opject
+        l = data.length
+        for(var i =1;i<l - 2;)
+            {
+                var Country = data[i].Country
+                while(i<l -2 && Country == data[i].Country)
+                    {
+                        var pop_no = parseInt(data[i].LifeExpectancy)
+                        lifeArray[k] = lifeArray[k] + pop_no
+                        i++
+                    }
+                k ++;
+                countryArray.push(data[i].Country)
+                lifeArray.push(parseInt(data[i].LifeExpectancy))
+                
+            }
+        json = d3.json("geo.json",function(json){
+            for(j =0;j<json.features.length;j++)
+                {
+                    
+                        json.features[j].LifeExpectancy = 0
+                    
+                }
+
+            for(i =0 ; i<countryArray.length;i++)
+            {
+                for(j =0;j<json.features.length;j++)
+                {
+                    
+                    if(countryArray[i] == json.features[j].properties.name)
+                    {
+                        json.features[j].LifeExpectancy = lifeArray[i]
+                        break
+                    }
+                    
+                }
+            }
+
+            let mouseOver = function(d) {
+                Tooltip.style("opacity", 1)
+                d3.selectAll(".Country")
+                    .transition()
+                    .duration(200)
+                    .style("opacity", .5)
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style("opacity", 1)
+                    .style("stroke", "black")
+            }
+            let mouseLeave = function(d) {
+                Tooltip.style("opacity", 0)
+                d3.selectAll(".Country")
+                    .transition()
+                    .duration(200)
+                    .style("opacity", .8)
+
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style("stroke", "transparent")
+            }
+              var mousemove = function(d) {
+                  var LifeExpectancy = d.LifeExpectancy
+                  if(LifeExpectancy == 0)
+                      {
+                          LifeExpectancy = "NA"
+                      } 
+                  Tooltip
+                      .html("<p>Country:"+d.properties.name+"<br> Avg. Life Expectance:"+LifeExpectancy/16+"</p>")
+                      .style("left",(d3.mouse(this)[0])+"px")
+                      .style("top", (d3.mouse(this)[1])+"px")
+                  
+              }
+            // Draw the map
+            min = d3.min(lifeArray)
+            max = d3.max(lifeArray) / 16
+             
+            maxcol = "#2D5485"
+            mincol="#FFFFFF"
+            var colorScale = d3.scaleLinear()
+            .domain([0,max])
+            .range([mincol,maxcol]);
+            svg.selectAll("path")
+                .data(json.features)
+                .enter()
+                .append("path")
+                .attr("d", d3.geoPath()
+                      .projection(projection))
+                .attr("fill", function (d,i) {
+                return colorScale(json.features[i].LifeExpectancy / 16)
+                    
+            })
+                .style("stroke", "transparent")
+                .attr("class", function(d){ return "Country" } )
+                .style("opacity", .8)
+                .on("mouseover", mouseOver)
+                .on("mousemove", mousemove)
+                .on("mouseleave", mouseLeave)
+             y = d3.scaleLinear().domain([0,max]).range([0,140]);
+       
+           var defs = svg.append("defs");
+            
+            var linearGradient = defs.append("linearGradient")
+    .attr("id", "linear-gradient");
+            
+            //Horizontal gradient
+linearGradient
+    .attr("x1", "0%")
+    .attr("y1", "0%")
+    .attr("x2", "100%")
+    .attr("y2", "0%")
+                        linearGradient.append("stop")
+   .attr('class', 'start')
+   .attr("offset", "0%")
+   .attr("stop-color", "white")
+   .attr("stop-opacity", 1);
+            
+            linearGradient.append("stop")
+   .attr('class', 'end')
+   .attr("offset", "100%")
+   .attr("stop-color", maxcol)
+   .attr("stop-opacity", 1);
+            d3.select("svg").append("rect").attr("x",20).attr("y",10).attr("width",140).attr("height",10).attr("fill","url(#linear-gradient)")
+            d3.select("svg").append("g").attr("transform","translate(20,20)").call(d3.axisBottom(y)).attr("stroke","white").attr("fill","white")
+
+        });
+});
+
+
+</script>
+    </body>
+</html>

@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v4.js"></script>
+    </head>
+    <body onload=plotGraph()>
+        <div id="div_template" style="background-color:black" width="100%" height="100%">
+            <div>
+                <center>
+                    <h2 style="color:#ea853c;padding-top:20px">Life Expectancy and various factors</h2>
+                    <p style="color:#af7098">These are the various factors with life expectancy for country and the year selected from the dropdown</p>
+                </center>
+            </div>
+            <select class="ui dropdown" onchange=selectCountry(this.value) style="background-color:blanchedalmond; margin-top:50px;margin-left: 100px;height :30px;width:100px">
+                <option value="USA">USA</option>
+                <option value="Australia">Australia</option>
+                <option value="Afghanistan">Afghanistan</option>
+                <option value="Angola">Angola</option>
+                <option value="Algeria">Algeria</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Bangladesh">Bangladesh</option>
+                <option value="Brazil">Brazil</option>
+            </select>
+            <select class="ui dropdown" onchange=selectYear(this.value) style="background-color:blanchedalmond; margin-top:50px;margin-left: 30px;height :30px;width:100px">
+                <option value="2015">2015</option>
+                <option value="2014">2014</option>
+                <option value="2013">2013</option>
+                <option value="2012">2012</option>
+                <option value="2011">2011</option>
+                <option value="2010">2010</option>
+                <option value="2009">2009</option>
+                <option value="2008">2008</option>
+                <option value="2007">2007</option>
+                <option value="2006">2006</option>
+                <option value="2005">2005</option>
+                <option value="2004">2004</option>
+                <option value="2003">2003</option>
+                <option value="2002">2002</option>
+                <option value="2001">2001</option>
+                <option value="2001">2000</option>
+            </select>
+            <svg id= "svg1" width="700" height="700" style="background-color:black;display:block; margin:auto">
+                <rect id = "rect0"></rect>
+                <rect id = "rect1"></rect>
+                <rect id = "rect2"></rect>
+                <rect id = "rect3"></rect>
+                <rect id = "rect4"></rect>
+                <rect id = "rect5"></rect>
+            </svg>
+            
+        </div>
+            
+            
+            
+        
+        <script>
+            var country = "USA"
+            var year = "2015"
+            function selectCountry(countrySel)
+            {
+                country = countrySel
+                plotGraph()
+            }
+            
+            function selectYear(YearSel)
+            {
+                year = YearSel
+                plotGraph()
+            }
+            
+            async function plotGraph(){
+            data = d3.csv("LifeExpectancyData.csv",function(data) {
+                d3.selectAll("text").attr("fill","transparent")
+                l = data.length
+                datarec = []
+                for(var i = 0;i < l;i++)
+                    {
+                        k = 0
+                        Country = data[i].Country
+                        datayear = data[i].Year
+                        if(Country == country && datayear == year)
+                            {
+                                Adult_Mortality =  parseInt(data[i].Adult_Mortality)
+                                Infant_Mortality = parseInt(data[i].infant_deaths)
+                                under_five = parseInt(data[i].under_five_deaths) 
+                                Alcohol = parseFloat(data[i].Alcohol)
+                                LifeExpectancy = parseInt(data[i].LifeExpectancy)
+                                BMI = parseFloat(data[i].BMI)
+                                if(!isNaN(Adult_Mortality) && !isNaN( Infant_Mortality) && !isNaN(under_five) && !isNaN(Alcohol) && !isNaN(LifeExpectancy) && !isNaN(BMI))
+                                    {
+                                        datarec.push(LifeExpectancy)
+                                        datarec.push(Adult_Mortality)
+                                        datarec.push(Infant_Mortality)
+                                        datarec.push(under_five)
+                                        datarec.push(Alcohol)
+                                        datarec.push(BMI)
+                                    }
+                                
+                                
+                            }
+                            
+                    }
+                x = d3.scaleBand().domain(["Life_Expectancy","Adult_Mortality","Infant_Mortality","under_five_deaths","Alcohol_Consumption","BMI"]).range([50,650])
+                Infant_Mortality = datarec[1]
+                d3.select("#rect0").attr("x",125).attr("y",400).attr("height",0).attr("width",50).attr("fill","blue")
+                d3.select("#rect1").attr("x",225).attr("y",400).attr("height",0).attr("width",50).attr("fill","green")
+                d3.select("#rect2").attr("x",325).attr("y",400)
+                    .attr("height",0).attr("width",50).attr("fill","orange")
+                d3.select("#rect3").attr("x",425).attr("y",400)
+                    .attr("height",0).attr("width",50).attr("fill","red")
+                d3.select("#rect4").attr("x",525).attr("y",400)
+                    .attr("height",0).attr("width",50).attr("fill","yellow")
+                d3.select("#rect5").attr("x",625).attr("y",400)
+                    .attr("height",0).attr("width",50).attr("fill","pink")
+                d3.select("#svg1").append("g").attr("transform","translate(50,400)").call(d3.axisBottom(x)).attr("stroke","white").attr("fill","white")
+                d3.select("#svg1").append("text").text(datarec[0]).attr("y",400 - datarec[0]).attr("x",137).attr("fill","white")
+                d3.select("#svg1").append("text").text(datarec[1]).attr("y",400 - datarec[1]).attr("x",237).attr("fill","white")
+                d3.select("#svg1").append("text").text(datarec[2]).attr("y",400 - datarec[2]).attr("x",337).attr("fill","white")
+                d3.select("#svg1").append("text").text(datarec[3]).attr("y",400 - datarec[3]).attr("x",437).attr("fill","white")
+                d3.select("#svg1").append("text").text(datarec[4]).attr("y",400 - datarec[4]).attr("x",537).attr("fill","white")
+                d3.select("#svg1").append("text").text(datarec[5]).attr("y",400 - datarec[5]).attr("x",637).attr("fill","white")
+                d3.select("#rect0")
+                    .transition()
+                    .duration(800)
+                    .attr("y",400 - datarec[0] )
+                    .attr("height", datarec[0] )
+                    .delay(100)
+                d3.select("#rect1")
+                    .transition()
+                    .duration(800)
+                    .attr("y",400 - datarec[1] )
+                    .attr("height", datarec[1] )
+                    .delay(100)
+                d3.select("#rect2")
+                    .transition()
+                    .duration(800)
+                    .attr("y",400 - datarec[2] )
+                    .attr("height", datarec[2] )
+                    .delay(100)
+               d3.select("#rect3")
+                    .transition()
+                    .duration(800)
+                    .attr("y",400 - datarec[3])
+                    .attr("height", datarec[3] )
+                    .delay(100)
+               d3.select("#rect4")
+                    .transition()
+                    .duration(800)
+                    .attr("y",400 - datarec[4])
+                    .attr("height", datarec[4] )
+                    .delay(100)
+                d3.select("#rect5")
+                    .transition()
+                    .duration(800)
+                    .attr("y",400 - datarec[5])
+                    .attr("height", datarec[5] )
+                    .delay(100)
+               
+            });
+            }
+        </script>
+    </body>
+</html>

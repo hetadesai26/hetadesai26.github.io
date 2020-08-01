@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v4.js"></script>
+    </head>
+    <body onload='init("2015")'>
+        <div id="div_template" style="background-color:black;overflow:hidden" width="100% height="100%>
+            <div>
+                <center>
+                    <h2 style="color:#ea853c;padding-top:20px">Life Expectancy Vs Diseases</h2>
+                    <p style="color:#af7098">These scatter plot represent life expectancy vs. four diseases: Hepatitis B , HIV , Polio , Measelis for the year selected.</p>
+                    
+                </center>
+            </div>
+            <select class="ui dropdown" onchange=init(this.value) style="background-color:blanchedalmond; margin-top:50px;margin-left: 30px;height :30px;width:100px">
+                <option value="2015">2015</option>
+                <option value="2014">2014</option>
+                <option value="2013">2013</option>
+                <option value="2012">2012</option>
+                <option value="2011">2011</option>
+                <option value="2010">2010</option>
+                <option value="2009">2009</option>
+                <option value="2008">2008</option>
+                <option value="2007">2007</option>
+                <option value="2006">2006</option>
+                <option value="2005">2005</option>
+                <option value="2004">2004</option>
+                <option value="2003">2003</option>
+                <option value="2002">2002</option>
+                <option value="2001">2001</option>
+                <option value="2001">2000</option>
+            </select>
+            <div id="div1">
+                <div id ="div2" style="background-color:black;display:block; margin:auto"></div>
+                <svg id = "svg1" style="background-color:black;display:block; margin:auto" ></svg>
+            </div>
+            <div id = "div3">
+                <div id ="div4" ></div>
+                <svg id = "svg2" style="background-color:black ;display:block; margin:auto"></svg>
+             </div>
+            <div id = "div5">
+                <div id ="div6" ></div>
+                <svg id = "svg3" style="background-color:black;display:block; margin:auto" ></svg>
+            </div>
+            <div id="div7">
+                <div id="div8"></div>
+                <svg id = "svg4" style="background-color:black;display:block; margin:auto"></svg>
+            </div>
+                
+        </div>
+
+        <script>
+            async function init(year){
+                d3.selectAll("circle").attr("fill","transparent")
+                data = d3.csv("LifeExpectancyData.csv",function(data) {
+                    l = data.length
+                    countryArray=[]
+                    hepatitisArray=[]
+                    measlesArray = []
+                    polioArray = []
+                    hivArray = []
+                    statusArray = []
+                    lifeArray = []
+                    k = 0;
+                    for(var i = 0; i<l;i++)
+                        {
+                            if(data[i].Year == year)
+                                {
+                                    hiv = data[i].HIV
+                                    polio = data[i].Polio
+                                    measles = data[i].Measles
+                                    hepatitis = data[i].HepatitisB
+                                    life = data[i].LifeExpectancy
+                                    if(!isNaN(hiv) && !isNaN(polio) && !isNaN(measles) && !isNaN(hepatitis) && hepatitis!="" && measles!="" && polio!="" && hiv!="" && !isNaN(life))
+                                        {
+                                        
+                                            countryArray.push(data[i].Country)
+                                            hepatitisArray.push(hepatitis)
+                                            measlesArray.push(measles)
+                                            hivArray.push(hiv)
+                                            polioArray.push(polio)
+                                            statusArray.push(data[i].Status)
+                                            lifeArray.push(life)
+                                            k++
+                                            
+                                        }
+                                }
+                        }
+                    maxLif = d3.max(lifeArray)
+                    maxHep = d3.max(hepatitisArray)
+                    y = d3.scaleLinear().domain([100,40]).range([0,400]);
+                    x = d3.scaleLinear().domain([1,105]).range([0,650]); 
+                    var x0 = d3.scaleLinear().domain([0, 0]).range([ 0, 700 ]);
+                    
+                    var Tooltip = d3.select("#div2")
+                    .style("opacity", 0)
+                    .attr("class", "tooltip")
+                    .style("background-color", "transparent")
+                    .style("color","white")
+                    .style("position", "relative")
+                    
+                    var mouseover = function(d,i) {
+                        Tooltip.style("opacity", 1).style("color","red")
+                    }
+                    var mousemove = function(d,i) {
+                        Tooltip.html("Country: "+countryArray[i] +"<br>Avg. Life Expectancy:"+lifeArray[i]+"<br>Status:"+statusArray[i]+"<br>Hepatitis B:"+hepatitisArray[i])
+                         .style("left", (d3.mouse(this)[0])+ 300 + "px")
+                         .style("top", (d3.mouse(this)[1]) + "px").style("color","yellow")
+                    }
+                    var mouseleave = function() {
+                        Tooltip.style("color","transparent")
+                    }
+                 
+                    d3.select("#svg1").data(data).attr("height",500).attr("width",700).append("g").attr("transform","translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cy",function(d,i){
+                        if(!isNaN(hepatitisArray[i])  && !isNaN(lifeArray[i]))
+                            {
+                                return y(lifeArray[i]);
+                            }
+                    })
+                     .attr("cx",function(d,i){
+                        if(!isNaN(lifeArray[i]) && !isNaN(hepatitisArray[i])){
+                         return x(hepatitisArray[i]);
+                        }
+                     }).attr("r",5)
+                     .attr("fill",function(d,i){
+                     if(statusArray[i] == "Developing")
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(hepatitisArray[i])){
+                                 return "red";
+                             }
+                         }
+                     else
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(hepatitisArray[i])){
+                                 return "blue";
+                             }
+                         }
+                    })
+                        .on("mouseover", mouseover)
+                        .on("mousemove", mousemove)
+                        .on("mouseleave", mouseleave)
+                    
+                    
+                    
+                    d3.select("#svg1").append("g").attr("transform","translate(50,450)").call(d3.axisBottom(x)).attr("stroke","white").attr("fill","white")
+                    d3.select("#svg1").append("g").attr("transform","translate(50,50)").call(d3.axisLeft(y)).attr("stroke","white").attr("fill","white")
+                    
+                    
+                    var Tooltip1 = d3.select("#div4")
+                    .style("opacity", 0)
+                    .attr("class", "tooltip")
+                    .style("background-color", "transparent")
+                    .style("color","white")
+                    .style("position", "relative")
+                    
+                    y1 = d3.scaleLinear().domain([100,40]).range([0,400]);
+                    x1 = d3.scaleLinear().domain([0,10]).range([0,650]);
+                    
+                    var mouseover1 = function(d,i) {
+                        Tooltip1.style("opacity", 1).style("color","red")
+                    }
+                    var mousemove1 = function(d,i) {
+                        Tooltip1.html("Country: "+countryArray[i] +"<br>Avg. Life Expectancy:"+lifeArray[i]+"<br>Status:"+statusArray[i]+"<br>HIV:"+hivArray[i])
+                         .style("left", (d3.mouse(this)[0])+ 300 + "px")
+                         .style("top", (d3.mouse(this)[1])+ "px").style("color","yellow")
+                    }
+                    var mouseleave1 = function() {
+                        Tooltip1.style("color","transparent")
+                    }
+                    d3.select("#svg2").data(data).attr("height",500).attr("width",700).append("g").attr("transform","translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cy",function(d,i){
+                        if(!isNaN(hivArray[i])  && !isNaN(lifeArray[i]))
+                            {
+                                
+                                return y1(lifeArray[i]);
+                            }
+                    })
+                     .attr("cx",function(d,i){
+                        if(!isNaN(lifeArray[i]) && !isNaN(hivArray[i])){
+                            return x1(hivArray[i]);
+                        }
+                     }).attr("r",5)
+                     .attr("fill",function(d,i){
+                     if(statusArray[i] == "Developing")
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(hivArray[i])){
+                                 return "red";
+                             }
+                         }
+                     else
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(hivArray[i])){
+                                 return "blue";
+                             }
+                         }
+                 })
+                    
+                        .on("mouseover", mouseover1)
+                        .on("mousemove", mousemove1)
+                        .on("mouseleave", mouseleave1)
+
+                    d3.select("#svg2").append("g").attr("transform","translate(50,450)").call(d3.axisBottom(x1)).attr("stroke","white").attr("fill","white")
+                    d3.select("#svg2").append("g").attr("transform","translate(50,50)").call(d3.axisLeft(y1)).attr("stroke","white").attr("fill","white")
+                    
+                     var Tooltip2 = d3.select("#div6")
+                    .style("opacity", 0)
+                    .attr("class", "tooltip")
+                    .style("background-color", "transparent")
+                    .style("color","white")
+                    .style("position", "relative")
+                     
+                     var mouseover2 = function(d,i) {
+                        Tooltip2.style("opacity", 1).style("color","red")
+                    }
+                    var mousemove2 = function(d,i) {
+                        Tooltip2.html("Country: "+countryArray[i] +"<br>Avg. Life Expectancy:"+lifeArray[i]+"<br>Status:"+statusArray[i]+"<br>Polio:"+polioArray[i])
+                         .style("left", (d3.mouse(this)[0])+ 300+ "px")
+                         .style("top", (d3.mouse(this)[1])+ "px").style("color","yellow")
+                    }
+                    var mouseleave2 = function() {
+                        Tooltip2.style("color","transparent")
+                    }
+                   
+                    x2 = d3.scaleLinear().domain([4,105]).range([0,650]);
+                    d3.select("#svg3").data(data).attr("height",500).attr("width",700).append("g").attr("transform","translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cy",function(d,i){
+                        if(!isNaN(polioArray[i])  && !isNaN(lifeArray[i]))
+                            {
+                                
+                                return y1(lifeArray[i]);
+                            }
+                    })
+                     .attr("cx",function(d,i){
+                        if(!isNaN(lifeArray[i]) && !isNaN(polioArray[i])){
+                            return x2(polioArray[i]);
+                        }
+                     }).attr("r",5)
+                     .attr("fill",function(d,i){
+                     if(statusArray[i] == "Developing")
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(polioArray[i])){
+                                 return "red";
+                             }
+                         }
+                     else
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(polioArray[i])){
+                                 return "blue";
+                             }
+                         }
+                 })
+                    
+                        .on("mouseover", mouseover2)
+                        .on("mousemove", mousemove2)
+                        .on("mouseleave", mouseleave2)
+                    d3.select("#svg3").append("g").attr("transform","translate(50,450)").call(d3.axisBottom(x2)).attr("stroke","white").attr("fill","white")
+                    d3.select("#svg3").append("g").attr("transform","translate(50,50)").call(d3.axisLeft(y1)).attr("stroke","white").attr("fill","white")
+                    
+                    var Tooltip3 = d3.select("#div8")
+                    .style("opacity", 0)
+                    .attr("class", "tooltip")
+                    .style("background-color", "transparent")
+                    .style("color","white")
+                    .style("position", "relative")
+                     
+                     var mouseover3 = function(d,i) {
+                        Tooltip3.style("opacity", 1).style("color","red")
+                    }
+                    var mousemove3 = function(d,i) {
+                        Tooltip3.html("Country: "+countryArray[i] +"<br>Avg. Life Expectancy:"+lifeArray[i]+"<br>Status:"+statusArray[i]+"<br>Measles:"+measlesArray[i])
+                         .style("left", (d3.mouse(this)[0])+ 300+ "px")
+                         .style("top", (d3.mouse(this)[1])+ "px").style("color","yellow")
+                    }
+                    var mouseleave3 = function() {
+                        Tooltip3.style("color","transparent")
+                    }
+                    
+                    x3 = d3.scaleLinear().domain([0,125]).range([0,650]); d3.select("#svg4").data(data).attr("height",500).attr("width",700).append("g").attr("transform","translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cy",function(d,i){
+                        if(!isNaN(measlesArray[i])  && !isNaN(lifeArray[i])&& measlesArray[i]!= 0)
+                            {
+                                
+                                return y1(lifeArray[i]);
+                            }
+                    })
+                     .attr("cx",function(d,i){
+                        if(!isNaN(lifeArray[i]) && !isNaN(measlesArray[i]) && measlesArray[i]!= 0){
+                            console.log(measlesArray[i])
+                            return x3(measlesArray[i]);
+                        }
+                     }).attr("r",5)
+                     .attr("fill",function(d,i){
+                     if(statusArray[i] == "Developing")
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(measlesArray[i])&& measlesArray[i]!= 0){
+                                 return "red";
+                             }
+                         }
+                     else
+                         {
+                             if(!isNaN(lifeArray[i]) && !isNaN(measlesArray[i])&& measlesArray[i]!= 0){
+                                 return "blue";
+                             }
+                         }
+                 })
+                    
+                        .on("mouseover", mouseover3)
+                        .on("mousemove", mousemove3)
+                        .on("mouseleave", mouseleave3)
+                    d3.select("#svg4").append("g").data(data).attr("transform","translate(50,450)").call(d3.axisBottom(x3)).attr("stroke","white").attr("fill","white")
+                    d3.select("#svg4").append("g").attr("transform","translate(50,50)").call(d3.axisLeft(y1)).attr("stroke","white").attr("fill","white")
+                    d3.select("#svg1").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("transform", "rotate(-90)")
+                     .attr("y", 10)
+                     .attr("x",-200)
+                     .text("Life Expectancy").attr("stroke","white")
+                 d3.select("#svg1").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("x", 400)
+                     .attr("y", 480)
+                     .text("Hepatitis B").attr("stroke","white");
+                 d3.select("#svg2").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("transform", "rotate(-90)")
+                     .attr("y", 10)
+                     .attr("x",-200)
+                     .text("Life Expectancy").attr("stroke","white")
+                 d3.select("#svg2").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("x", 400)
+                     .attr("y", 480)
+                     .text("HIV").attr("stroke","white");
+                 d3.select("#svg3").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("transform", "rotate(-90)")
+                     .attr("y", 10)
+                     .attr("x",-200)
+                     .text("Life Expectancy").attr("stroke","white")
+                 d3.select("#svg3").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("x", 400)
+                     .attr("y", 480)
+                     .text("Polio").attr("stroke","white");
+                 d3.select("#svg4").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("transform", "rotate(-90)")
+                     .attr("y", 10)
+                     .attr("x",-200)
+                     .text("Life Expectancy").attr("stroke","white")
+                 d3.select("#svg4").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("x", 400)
+                     .attr("y", 480)
+                     .text("Measles").attr("stroke","white");
+                    
+                    
+                    
+                     d3.select("svg").append("text") 
+                     .attr("x", 370)
+                     .attr("y", 30)
+                     .text("Status:").attr("fill","white");
+                d3.select("svg").append("rect").attr("x",250).attr("y",40).attr("height",10).attr("width",10).attr("fill","red")
+                 d3.select("svg").append("text") 
+                     .attr("x", 270)
+                     .attr("y", 50)
+                     .text("Developing").attr("fill","white");
+                 d3.select("svg").append("rect").attr("x",450).attr("y",40).attr("height",10).attr("width",10).attr("fill","blue")
+                 d3.select("svg").append("text") 
+                     .attr("x", 470)
+                     .attr("y", 50)
+                     .text("Developed").attr("fill","white");
+            
+                });
+                
+                
+                
+            }
+                
+                          
+        </script>
+    </body>
+</html>

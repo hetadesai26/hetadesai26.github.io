@@ -1,0 +1,33 @@
+<html>
+<script src='https://d3js.org/d3.v5.min.js'></script>
+<style> circle {fill: lightblue; stroke: black;} </style>
+<body style="background-color: black">
+    <h1 style="color:#ea853c"><center>Life Expectancy(2000 - 2015)</center></h1>
+    <div style="background-color: black;margin-right:5%;margin-left:5%;margin-top:40px;margin-top:40px;">
+        <div style="background-color: #aba5a5;display:block;margin-bottom:50px;height=90%">
+            <iframe style="display:block;margin:auto"src="map.html" name="targetframe" style="display:block;margin-right:5%;margin-bottom:5px" height="600" width = "100%" allowTransparency="true" scrolling="yes" frameborder="0" >
+            </iframe>
+            <h4><center style="color:#253692">Map for Life Expectancy</center></h4>
+            <p><center style="color:#543ab7;padding: 20">The above map represents the map with average life expectance of the countries from year 2000 to 2015. The life expectancy can be seen varying between the range 40 to 90 years. Greater the average life expectancy darker is the blue color. Japan has the highest average life expectancy over the years with a value of 87.3125 . And the country with the least average life expectancy is Zimbabwe. This data was taken from Kaggle.</center></p>  
+            
+        </div>
+        <div style="background-color: #aba5a5;display:block;margin-bottom:50px;padding: 20;color:#253692">
+                <center>
+                    <p>Click on any button to explore more about the different factors and diseases affecting life expectancy. Or simply scroll down to view the relationship between life expectancy and the expenditure ans how the life expectancy of the county changed over years</p>
+                    <input type="button" onclick="location.href='Diseases.html'" value="Various Diseas Vs Life Expectancy" style="background-color:#e4b854">
+                    <input type="button" onclick="location.href='Mortality.html'" value="Various Factors Affecting Life Expectancy" style="background-color:#f5b9b9">
+                </center>
+            </div>
+        <div style="width: 50%; float:left; height:750px; background:#aba5a5;margin-bottom: 10px" >
+            <center><h4 style="color:#841f1f">Life Expectancy Vs Expenditure</h4></center>
+            <iframe src="LifeExpectancyVsotalExpenditure.html" allowTransparency="true"  height="675" width = "100%" scrolling="no"></iframe>
+        </div>
+        <div style="width: 50%; float:left; height:750px; background:#aba5a5;margin-bottom: 10px">
+            <center><h4 style="color:#841f1f">Life Expectancy for each year for selected Country</h4></center>
+            <iframe src="Country.html" allowTransparency="true"  height="675" width = "98%" scrolling="no" scrolling="no" ></iframe>
+        </div>
+    </div>
+    
+
+</body>
+</html>

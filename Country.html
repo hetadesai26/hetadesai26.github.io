@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v4.js"></script>
+    </head>
+    <body onload=init("Albania")>
+        <div id="div_template" style="background-color:black;width=550px"  height="100%">
+              <select class="ui dropdown" onchange=init(this.value) style="background-color:blanchedalmond; margin-top:35px;margin-left: 100px;height :30px;width:100px">
+                <option value ="Albania">Albania</option>
+                <option value="Afghanistan">Afghanistan</option>
+                <option value="Algeria">Algeria</option>
+                <option value="Argentina">Argentina</option>
+                <option value="Armenia">Armenia</option>
+                <option value="Australia">Australia</option>
+                <option value="Austria">Austria</option>
+                <option value="Bahrain">Bahrain</option>
+                <option value="Bangladesh">Bangladesh</option>
+                <option value="Brazil">Brazil</option>
+                <option value="Canada">Canada</option>
+                <option value="India">India</option>
+                <option value="USA">USA</option>
+                
+            </select>
+            <svg id="svg1" style = "background-color:black;display:block; margin:auto"></svg>
+        </div>
+    </body>
+    <script>
+        async function init(country)
+        {
+            
+            data = d3.csv("LifeExpectancyData.csv",function(data) {
+                d3.selectAll("circle").attr("fill","none")
+                d3.selectAll("path").attr("stroke","none")
+                d3.selectAll("text").attr("fill","none")
+                var data2 = []
+                var data3 = []
+                var j = 0
+                x = d3.scaleBand().domain(["2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015"]).range([50,575])
+                y = d3.scaleLinear().domain([90,55]).range([1,500])
+                d3.select("#svg1").attr("height",600).attr("width",610).append("g")
+                    .attr("transform","translate(25,50)").selectAll("circle").data(data).enter()
+                    .append("circle").attr("cx",function(d){
+                    if(d.Country == country)
+                        {
+                            return x(d.Year)
+                        }
+                })
+                    .attr("cy",function(d,i)
+                         {
+                    if(d.Country == country)
+                        {
+                            data2.push(d.Year)
+                            data3.push(d.LifeExpectancy)
+                            return y(d.LifeExpectancy)
+                        }
+                }).attr("r",function(d)
+                        {
+                    if(d.Country==country)
+                        return 5
+                })
+                    .attr("fill",function(d){
+                    if(d.Country == country)
+                        {
+                            if(d.Status == "Developing")
+                                return "red";
+                            else
+                                return "blue";
+                        }
+                    
+                })
+                d3.select("svg").append("g").attr("transform","translate(0,550)").call(d3.axisBottom(x)).attr("stroke","white").attr("fill","white")
+                d3.select("svg").append("g").attr("transform","translate(50,50)").call(d3.axisLeft(y)).attr("stroke","white").attr("fill","white")
+                d3.select("svg").append("g").attr("transform","translate(12.5,40)").selectAll("text").data(data3).enter().append("text").
+                text(function(d){
+                    console.log(d)
+                    return d
+                })
+                    .attr("x",function(d,i){
+                    xv = x(data2[i])
+                    console.log(xv)
+                    return xv;
+                })
+                    .attr("y",function(d){
+                    
+                    return y(d)
+                }).attr("fill","white")
+                    d3.select("svg").append("path")
+                        .datum(data2)
+                        .attr("fill", "none")
+                        .attr("stroke", "white")
+                        .attr("stroke-width", 1.5)
+                        .attr("d", d3.line().x(function(d) {
+                                return x(d) + 25
+                    }).y(function(d,i) { 
+                            return y(data3[i]) + 50
+                    })
+                             )
+                
+                d3.select("svg").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("transform", "rotate(-90)")
+                     .attr("y", 30)
+                     .attr("x",-250)
+                     .text("Life Expectancy").attr("stroke","white")
+                 d3.select("svg").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("x", 325)
+                     .attr("y", 590)
+                     .text("Year").attr("stroke","white");
+                
+            
+            });
+        }
+                             
+                            
+    </script>
+</html>

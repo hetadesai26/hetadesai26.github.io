@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://d3js.org/d3.v4.js"></script>
+    </head>
+    <body>
+        <div id="div_template" style="background-color:black;overflow: hidden" width="100%" height="100%">
+        </div>
+        <script>
+             data = d3.csv("LifeExpectancyData.csv",function(data) {
+                 var countryArray = [];
+                 var lifeArray = [];
+                 var expenditureArray = []
+                 var countryId = [];
+                 var developArray=[];
+                 var k =0
+                 countryArray.push(data[0].Country)
+                 lifeArray.push(parseInt(data[0].LifeExpectancy))
+                 expenditureArray.push(parseInt(data[0].TotalExpenditure))
+                 developArray.push(data[0].Status)
+                 
+                 //get data from csv file and add to the json opject
+                 l = data.length
+                 for(var i =1;i<l - 2;)
+                 {
+                     var Country = data[i].Country
+                     while(i<l -2 && Country == data[i].Country)
+                     {
+                        var pop_no = parseInt(data[i].LifeExpectancy)
+                        var exp = parseInt(data[i].TotalExpenditure)
+
+                        if(pop_no == NaN)
+                            {
+                                pop_no = 0
+                            }
+                         if(isNaN(expenditureArray[k]))
+                             {
+                                 expenditureArray[k] = parseInt(data[i+1].TotalExpenditure)
+                             }
+                         if(isNaN(exp))
+                            { 
+                                expenditureArray[k] = expenditureArray[k] + parseInt(data[i - 1].TotalExpenditure)
+                            }
+                        else
+                            { 
+                                expenditureArray[k] = expenditureArray[k] + exp
+                            }
+                        lifeArray[k] = lifeArray[k] + pop_no
+                        
+                         
+                        i++
+                    }
+
+                     k ++;
+                     countryArray.push(data[i].Country)
+                     lifeArray.push(parseInt(data[i].LifeExpectancy))
+                     expenditureArray.push(parseInt(data[i].TotalExpenditure))
+                     developArray.push(data[i].Status)
+                     
+                     
+            }
+                 countryArray.pop()
+                 lifeArray.pop()
+                 expenditureArray.pop()
+                 developArray.pop()
+                 minExp = d3.min(expenditureArray)/16
+                 maxExp = 18
+                 minLif = 1
+                 maxLif = 100
+                 y = d3.scaleLinear().domain([maxLif,40]).range([0,500]);
+                 
+                 var x = d3.scaleLinear().domain([0, 0]).range([ 0, 800 ]);
+                 x1 = d3.scaleLinear().domain([1,maxExp]).range([10,550]); 
+                 var Tooltip = d3.select("div")
+                 .append("div")
+                 .style("opacity", 0)
+                 .attr("class", "tooltip")
+                 .style("background-color", "transparent").style("color","white")
+                 .style("position", "relative")
+                 
+                 var mouseover = function(d,i) {
+                     Tooltip.style("opacity", 1).style("color","white")
+                 }
+                 var mousemove = function(d,i) {
+                     Tooltip.html("Country: "+countryArray[i] +"<br>Avg. Life Expectancy:"+lifeArray[i]/16+"<br> Avg. Expenditure:"+expenditureArray[i]/16+"<br>Status:"+developArray[i])
+                         .style("left", (d3.mouse(this)[0]) - 35+ "px")
+                         .style("top", (d3.mouse(this)[1]) + "px").style("color","white")
+                 }
+                 var mouseleave = function() {
+                     Tooltip.style("color","transparent")
+                 }
+                 
+              
+
+                d3.select("div").append("svg").data(data).attr("height",600).attr("width",800).style("display","block").style("margin","auto").append("g").attr("transform","translate(50,50)").selectAll("circle").data(data).enter().append("circle").attr("cx",function(d,i){if(!isNaN(expenditureArray[i]) && expenditureArray[i]!=0){
+                      return x(expenditureArray[i]/16);
+                 }
+                 })
+                     .attr("cy",function(d,i){
+                     if(!isNaN(lifeArray[i]/16) && lifeArray[i]/16!=0 && !isNaN(expenditureArray[i]) && !isNaN(lifeArray[i]/16))
+                     {
+                         return y(lifeArray[i]/16);
+                     }}).attr("r",5)
+                     .on("mouseover", mouseover)
+                     .on("mousemove", mousemove)
+                     .on("mouseleave", mouseleave).attr("fill",function(d,i){
+                     if(developArray[i] == "Developing")
+                         {
+                             return "red";
+                         }
+                     else
+                         {
+                             if(!isNaN(lifeArray[i]/16) && lifeArray[i]/16!=0 && !isNaN(expenditureArray[i]) && !isNaN(lifeArray[i]/16))
+                             {
+                                return "blue";
+                             }
+                             
+
+                         }
+                 })
+                 d3.select("svg").append("g").attr("transform","translate(50,550)").call(d3.axisBottom(x1)).attr("stroke","white").attr("fill","white")
+                 d3.select("svg").append("g").attr("transform","translate(60,50)").call(d3.axisLeft(y)).attr("stroke","white").attr("fill","white")
+                 d3.select("svg").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("transform", "rotate(-90)")
+                     .attr("y", 30)
+                     .attr("x",-250)
+                     .text("Avg. Life Expectancy").attr("stroke","white")
+                 d3.select("svg").append("text")
+                     .attr("text-anchor", "end")
+                     .attr("x", 400)
+                     .attr("y", 590)
+                     .text("Avg. Expenditure").attr("stroke","white");
+                 d3.select("svg").append("text") 
+                     .attr("x", 450)
+                     .attr("y", 30)
+                     .text("Status:").attr("fill","white");
+                 d3.select("svg").append("rect").attr("x",450).attr("y",40).attr("height",10).attr("width",10).attr("fill","red")
+                 d3.select("svg").append("text") 
+                     .attr("x", 470)
+                     .attr("y", 50)
+                     .text("Developing").attr("fill","white");
+                 d3.select("svg").append("rect").attr("x",450).attr("y",60).attr("height",10).attr("width",10).attr("fill","blue")
+                 d3.select("svg").append("text") 
+                     .attr("x", 470)
+                     .attr("y", 70)
+                     .text("Developed").attr("fill","white");
+                            
+                d3.select("svg").selectAll("circle")
+                    .transition()
+                    .delay(function(d,i){return(i*3)})
+                    .duration(2000).attr("cx",function(d,i){if(!isNaN(expenditureArray[i]) && expenditureArray[i]!=0){
+                      return x1(expenditureArray[i]/16);
+                        }
+                                                           })
+                     .attr("cy",function(d,i){
+                     if(!isNaN(lifeArray[i]/16) && lifeArray[i]/16!=0 && !isNaN(expenditureArray[i]) && !isNaN(lifeArray[i]/16))
+                     {
+                         return y(lifeArray[i]/16);
+                     }})
+                 d3.select("svg").append("text").text("Highest expenditure").attr("y",y(87)).attr("x",x1(14)).attr("fill","white")
+                 d3.select("svg").append("text").text("Country:USA").attr("y",y(85)).attr("x",x1(14)).attr("fill","white")
+                 d3.select("svg").append("text").text("Avg. Life Expectancy:82.5").attr("y",y(83)).attr("x",x1(14)).attr("fill","white")
+                 d3.select("svg").append("text").text("Avg. Expenditure:15.9375").attr("y",y(81)).attr("x",x1(14)).attr("fill","white")
+                 d3.select("svg").append("g").attr("transform","translate(50,50)").append("circle").attr("cx",x1(15.9375)).attr("cy",y(82.5)).attr("r",8).attr("stroke","white").attr("fill","transparent")
+                 d3.select("svg").append("line").attr("x2",x1(16)).attr("x1",x1(17.25)).attr("y2",y(80)).attr("y1",y(77.5)).attr("stroke","white")
+                 
+                 
+
+        });
+        </script>
+        
+    </body>
+</html>
