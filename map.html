@@ -110,13 +110,14 @@
                     .style("stroke", "transparent")
             }
               var mousemove = function(d) {
-                  var LifeExpectancy = d.LifeExpectancy
-                  if(LifeExpectancy == 0)
+                  var LifeExpectancy = d.LifeExpectancy / 16
+                  if(LifeExpectancy == 0 || isNaN(LifeExpectancy))
                       {
-                          LifeExpectancy = "NA"
+                          LifeExpectancy = "N/A"
+                          
                       } 
                   Tooltip
-                      .html("<p>Country:"+d.properties.name+"<br> Avg. Life Expectance:"+LifeExpectancy/16+"</p>")
+                      .html("<p>Country:"+d.properties.name+"<br> Avg. Life Expectance:"+LifeExpectancy+"</p>")
                       .style("left",(d3.mouse(this)[0])+"px")
                       .style("top", (d3.mouse(this)[1])+"px")
                   
